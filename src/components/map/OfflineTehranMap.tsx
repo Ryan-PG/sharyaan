@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { Language, RouteResult, Station } from "@/types/metro";
-import { formatNumber, stationDisplayName } from "@/utils/text";
+import { stationDisplayName } from "@/utils/text";
 
 type OfflineTehranMapProps = {
   stations: Station[];
@@ -21,6 +21,8 @@ type OfflineTehranMapProps = {
   route?: RouteResult | null;
   onStationClick?: (stationId: string) => void;
 };
+
+type MarkerAnchor = "center" | "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
 const TEHRAN_BOUNDS: [[number, number], [number, number]] = [
   [50.87, 35.383],
@@ -41,7 +43,7 @@ export function OfflineTehranMap({
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const popupRef = useRef<maplibregl.Popup | null>(null);
+  const labelMarkersRef = useRef<maplibregl.Marker[]>([]);
   const style = useMemo(() => buildStyle(), []);
   const lineData = useMemo(() => buildLineCollection(stations), [stations]);
   const routeData = useMemo(() => buildRouteCollection(route), [route]);
@@ -57,10 +59,6 @@ export function OfflineTehranMap({
     [destinationId, language, originId, selectedStationId, stations],
   );
   const stationDataRef = useRef(stationData);
-  const selectedStation = useMemo(
-    () => stations.find((station) => station.id === selectedStationId) ?? null,
-    [selectedStationId, stations],
-  );
   const clickHandlerRef = useRef(onStationClick);
 
   useEffect(() => {
@@ -215,7 +213,8 @@ export function OfflineTehranMap({
     mapRef.current = map;
 
     return () => {
-      popupRef.current?.remove();
+      labelMarkersRef.current.forEach((marker) => marker.remove());
+      labelMarkersRef.current = [];
       map.remove();
       mapRef.current = null;
     };
@@ -247,45 +246,29 @@ export function OfflineTehranMap({
 
   useEffect(() => {
     const map = mapRef.current;
-    popupRef.current?.remove();
-    popupRef.current = null;
+    labelMarkersRef.current.forEach((marker) => marker.remove());
+    labelMarkersRef.current = [];
 
-    if (!map || !selectedStation) return;
+    if (!map) return;
 
-    const popup = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      maxWidth: "280px",
-      offset: 12,
-    })
-      .setLngLat([selectedStation.longitude, selectedStation.latitude])
-      .setHTML(
-        `<div class="metro-map-popup"><strong>${escapeHtml(
-          stationDisplayName(selectedStation, language),
-        )}</strong><span>${escapeHtml(
-          `${t("lines")}: ${selectedStation.lines
-            .map((line) => formatNumber(line, language))
-            .join(", ")}`,
-        )}</span></div>`,
-      );
+    const labels = buildSelectedStationLabels(stations, language, originId, destinationId);
+    labelMarkersRef.current = labels.map((label) => {
+      const marker = new maplibregl.Marker({
+        element: createStationLabelElement(label.text, language),
+        anchor: label.anchor,
+        offset: label.offset,
+      })
+        .setLngLat([label.station.longitude, label.station.latitude])
+        .addTo(map);
 
-    popupRef.current = popup;
-    const addPopup = () => {
-      if (popupRef.current === popup) popup.addTo(map);
-    };
-
-    if (map.isStyleLoaded()) {
-      addPopup();
-    } else {
-      map.once("load", addPopup);
-    }
+      return marker;
+    });
 
     return () => {
-      map.off("load", addPopup);
-      popup.remove();
-      if (popupRef.current === popup) popupRef.current = null;
+      labelMarkersRef.current.forEach((marker) => marker.remove());
+      labelMarkersRef.current = [];
     };
-  }, [language, selectedStation, t]);
+  }, [destinationId, language, originId, stations]);
 
   return (
     <section className="overflow-hidden rounded-lg border bg-card shadow-panel">
@@ -453,6 +436,56 @@ function buildStationCollection(
   };
 }
 
+function buildSelectedStationLabels(
+  stations: Station[],
+  language: Language,
+  originId: string | null,
+  destinationId: string | null,
+): Array<{
+  station: Station;
+  text: string;
+  anchor: MarkerAnchor;
+  offset: [number, number];
+}> {
+  const selected: Array<{ id: string | null; anchor: MarkerAnchor; offset: [number, number] }> = [
+    { id: originId, anchor: "left", offset: [14, 0] },
+    { id: destinationId, anchor: "right", offset: [-14, 0] },
+  ];
+  const seen = new Set<string>();
+  const labels: Array<{
+    station: Station;
+    text: string;
+    anchor: MarkerAnchor;
+    offset: [number, number];
+  }> = [];
+
+  for (const item of selected) {
+    if (!item.id) continue;
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+
+    const station = stations.find((candidate) => candidate.id === item.id);
+    if (!station) continue;
+
+    labels.push({
+      station,
+      text: stationDisplayName(station, language),
+      anchor: item.anchor,
+      offset: item.offset,
+    });
+  }
+
+  return labels;
+}
+
+function createStationLabelElement(text: string, language: Language) {
+  const element = document.createElement("div");
+  element.className = "metro-station-inline-label";
+  element.dir = language === "fa" ? "rtl" : "ltr";
+  element.textContent = text;
+  return element;
+}
+
 function buildLineCollection(stations: Station[]): GeoJSON.FeatureCollection {
   const byId = new Map(stations.map((station) => [station.id, station]));
   const seen = new Set<string>();
@@ -519,13 +552,4 @@ function buildRouteCollection(route: RouteResult | null): GeoJSON.FeatureCollect
       };
     }),
   };
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }

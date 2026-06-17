@@ -188,6 +188,23 @@ svg text {
   line-height: 1.4;
 }
 
+.metro-station-inline-label {
+  max-width: min(220px, 52vw);
+  width: max-content;
+  border: 1px solid rgb(15 23 42 / 0.1);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: 0 8px 22px -14px rgb(15 23 42 / 0.6);
+  color: #111827;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 3px 7px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 .maplibregl-ctrl-group {
   border: 1px solid hsl(var(--border));
   background: hsl(var(--card));

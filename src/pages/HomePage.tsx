@@ -8,7 +8,6 @@ import { RecentSearches } from "@/components/route/RecentSearches";
 import { RouteResultPanel } from "@/components/route/RouteResultPanel";
 import { RouteSelectionCard } from "@/components/route/RouteSelectionCard";
 import { FavoritesList } from "@/components/stations/FavoritesList";
-import { StationDetailsSheet } from "@/components/stations/StationDetailsSheet";
 import { findShortestPath } from "@/services/dijkstra";
 import { buildRouteUrl } from "@/services/share";
 import { useMetroStore } from "@/store/useMetroStore";
@@ -36,7 +35,6 @@ export default function HomePage() {
   const setLanguage = useMetroStore((state) => state.setLanguage);
   const setTheme = useMetroStore((state) => state.setTheme);
   const addRecentRoute = useMetroStore((state) => state.addRecentRoute);
-  const toggleFavorite = useMetroStore((state) => state.toggleFavorite);
 
   useRouteParams(stations);
 
@@ -44,11 +42,6 @@ export default function HomePage() {
     if (!routeRequested && !(originId && destinationId)) return null;
     return findShortestPath(graph, originId, destinationId);
   }, [destinationId, graph, originId, routeRequested]);
-
-  const selectedStation = useMemo(
-    () => stations.find((station) => station.id === selectedStationId) ?? null,
-    [selectedStationId, stations],
-  );
 
   const copiedUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -96,10 +89,6 @@ export default function HomePage() {
     if (routeRequested && originId && destinationId && !route) return t("noRoute");
     return t("emptyRoute");
   }, [destinationId, originId, route, routeRequested, t]);
-
-  const currentFavorite = selectedStation
-    ? favoriteStationIds.includes(selectedStation.id)
-    : false;
 
   return (
     <motion.div
@@ -197,14 +186,6 @@ export default function HomePage() {
           onStationClick={handleStationClick}
         />
       </main>
-
-      <StationDetailsSheet
-        station={selectedStation}
-        language={language}
-        favorite={currentFavorite}
-        onToggleFavorite={() => selectedStation && toggleFavorite(selectedStation.id)}
-        onClose={() => setSelectedStation(null)}
-      />
     </motion.div>
   );
 }
