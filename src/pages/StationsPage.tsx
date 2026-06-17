@@ -6,12 +6,15 @@ import { LineBadges } from "@/components/stations/LineBadges";
 import { StationDataDialog } from "@/components/stations/StationDataDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useMetroData } from "@/hooks/useMetroData";
+import { usePageSeo } from "@/hooks/usePageSeo";
+import { buildDefaultMetadata, buildLineGroups, linePath } from "@/services/seo";
 import { useMetroStore } from "@/store/useMetroStore";
 import type { Station } from "@/types/metro";
-import { compareStationPersianNames, formatNumber, stationDisplayName } from "@/utils/text";
+import { formatNumber, stationDisplayName } from "@/utils/text";
+import { Link } from "react-router-dom";
 
 type LineGroup = {
-  line: number;
+  id: number;
   color: string;
   stations: Station[];
 };
@@ -25,7 +28,9 @@ export default function StationsPage() {
   const setLanguage = useMetroStore((state) => state.setLanguage);
   const setTheme = useMetroStore((state) => state.setTheme);
 
-  const lineGroups = useMemo(() => buildLineGroups(stations), [stations]);
+  const lineGroups = useMemo<LineGroup[]>(() => buildLineGroups(stations), [stations]);
+
+  usePageSeo(buildDefaultMetadata("/stations"));
 
   return (
     <motion.div
@@ -63,7 +68,7 @@ export default function StationsPage() {
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {lineGroups.map((group) => (
-            <Card key={group.line} className="overflow-hidden">
+            <Card key={group.id} className="overflow-hidden">
               <CardHeader className="border-b pb-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -73,7 +78,9 @@ export default function StationsPage() {
                         style={{ backgroundColor: group.color }}
                         aria-hidden
                       />
-                      {t("line", { line: formatNumber(group.line, language) })}
+                      <Link to={linePath(group.id)} className="hover:underline">
+                        {t("line", { line: formatNumber(group.id, language) })}
+                      </Link>
                     </CardTitle>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {t("stationCount", {
@@ -87,7 +94,7 @@ export default function StationsPage() {
                 <div className="grid gap-1">
                   {group.stations.map((station) => (
                     <button
-                      key={`${group.line}-${station.id}`}
+                      key={`${group.id}-${station.id}`}
                       type="button"
                       onClick={() => setSelectedStation(station)}
                       className="flex min-h-12 w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-start text-sm transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
@@ -120,33 +127,4 @@ export default function StationsPage() {
       />
     </motion.div>
   );
-}
-
-function buildLineGroups(stations: Station[]): LineGroup[] {
-  const groups = new Map<number, LineGroup>();
-
-  for (const station of stations) {
-    station.lines.forEach((line, index) => {
-      const color = station.colors[index] ?? station.colors[0] ?? "#71717a";
-      const group = groups.get(line);
-
-      if (group) {
-        group.stations.push(station);
-        return;
-      }
-
-      groups.set(line, {
-        line,
-        color,
-        stations: [station],
-      });
-    });
-  }
-
-  return [...groups.values()]
-    .map((group) => ({
-      ...group,
-      stations: [...group.stations].sort(compareStationPersianNames),
-    }))
-    .sort((a, b) => a.line - b.line);
 }
