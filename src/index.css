@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-Thin.ttf") format("truetype");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-ExtraLight.ttf") format("truetype");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../assets/fonts/Vazirmatn-Black.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --background: 0 0% 100%;
+  --foreground: 240 10% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 9%;
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 46%;
+  --border: 240 6% 90%;
+  --primary: 240 7% 13%;
+  --primary-foreground: 0 0% 98%;
+  --accent: 210 20% 96%;
+  --accent-foreground: 240 7% 13%;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: 240 10% 4%;
+  --foreground: 0 0% 96%;
+  --card: 240 6% 10%;
+  --card-foreground: 0 0% 96%;
+  --muted: 240 5% 14%;
+  --muted-foreground: 240 5% 68%;
+  --border: 240 5% 18%;
+  --primary: 0 0% 96%;
+  --primary-foreground: 240 7% 10%;
+  --accent: 240 5% 15%;
+  --accent-foreground: 0 0% 96%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  background: hsl(var(--background));
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgb(241 245 249 / 0.55), transparent 34rem),
+    hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: theme("fontFamily.sans");
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.dark body {
+  background:
+    radial-gradient(circle at top left, rgb(39 39 42 / 0.7), transparent 36rem),
+    hsl(var(--background));
+}
+
+[dir="rtl"] body {
+  font-family: theme("fontFamily.fa");
+}
+
+button,
+input {
+  font: inherit;
+}
+
+svg text {
+  user-select: none;
+}
+
+::selection {
+  background: rgb(24 24 27 / 0.14);
+}
+
+.dark ::selection {
+  background: rgb(244 244 245 / 0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
