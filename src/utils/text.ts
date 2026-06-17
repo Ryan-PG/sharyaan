@@ -1,5 +1,10 @@
 import type { Language } from "@/types/metro";
 
+const persianNameCollator = new Intl.Collator("fa-IR", {
+  numeric: true,
+  sensitivity: "base",
+});
+
 const persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
 
 export function repairMojibake(value?: string) {
@@ -19,6 +24,16 @@ export function stationDisplayName(
   language: Language,
 ) {
   return language === "fa" ? station.nameFa || station.name : station.name;
+}
+
+export function compareStationPersianNames(
+  a: { name: string; nameFa: string },
+  b: { name: string; nameFa: string },
+) {
+  return (
+    persianNameCollator.compare(a.nameFa || a.name, b.nameFa || b.name) ||
+    a.name.localeCompare(b.name)
+  );
 }
 
 export function formatNumber(value: number, language: Language) {

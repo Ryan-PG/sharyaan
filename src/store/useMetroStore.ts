@@ -20,14 +20,19 @@ type MetroState = {
   toggleFavorite: (stationId: string) => void;
 };
 
+type PersistedMetroState = Pick<
+  MetroState,
+  "language" | "theme" | "recentRoutes" | "favoriteStationIds"
+>;
+
 export const useMetroStore = create<MetroState>()(
   persist(
     (set, get) => ({
       originId: null,
       destinationId: null,
       selectedStationId: null,
-      language: "en",
-      theme: "light",
+      language: "fa",
+      theme: "dark",
       recentRoutes: [],
       favoriteStationIds: [],
       setOrigin: (id) => set({ originId: id }),
@@ -58,6 +63,12 @@ export const useMetroStore = create<MetroState>()(
     }),
     {
       name: "tehran-metro-navigator",
+      version: 1,
+      migrate: (persistedState): PersistedMetroState => ({
+        ...(persistedState as PersistedMetroState),
+        language: "fa",
+        theme: "dark",
+      }),
       partialize: (state) => ({
         language: state.language,
         theme: state.theme,

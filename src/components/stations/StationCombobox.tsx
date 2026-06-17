@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/Input";
 import { LineBadges } from "@/components/stations/LineBadges";
 import type { Language, Station } from "@/types/metro";
 import { cn } from "@/utils/cn";
-import { normalizeSearch, stationDisplayName } from "@/utils/text";
+import { compareStationPersianNames, normalizeSearch, stationDisplayName } from "@/utils/text";
 
 type StationComboboxProps = {
   label: string;
@@ -51,12 +51,12 @@ export function StationCombobox({
         );
       })
       .sort((a, b) => {
-        if (!normalized) return a.name.localeCompare(b.name);
+        if (!normalized) return compareStationPersianNames(a, b);
         const aName = normalizeSearch(`${a.name} ${a.nameFa}`);
         const bName = normalizeSearch(`${b.name} ${b.nameFa}`);
         const aStarts = aName.startsWith(normalized) ? 0 : 1;
         const bStarts = bName.startsWith(normalized) ? 0 : 1;
-        return aStarts - bStarts || a.name.localeCompare(b.name);
+        return aStarts - bStarts || compareStationPersianNames(a, b);
       });
 
     return ranked.slice(0, MAX_RESULTS);

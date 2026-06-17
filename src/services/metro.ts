@@ -1,6 +1,6 @@
 import rawStations from "@/data/stations.json";
 import type { RawStation, RawStations, Station } from "@/types/metro";
-import { repairMojibake } from "@/utils/text";
+import { compareStationPersianNames, repairMojibake } from "@/utils/text";
 
 const parsedStations = normalizeStations(rawStations as RawStations);
 
@@ -33,7 +33,7 @@ function normalizeStations(data: RawStations): Station[] {
   return Object.entries(data)
     .map(([id, station]) => toStation(id, station))
     .filter((station) => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort(compareStationPersianNames);
 }
 
 function toStation(id: string, station: RawStation): Station {

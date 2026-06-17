@@ -43,6 +43,8 @@ export function OfflineTehranMap({
   const mapRef = useRef<maplibregl.Map | null>(null);
   const popupRef = useRef<maplibregl.Popup | null>(null);
   const style = useMemo(() => buildStyle(), []);
+  const lineData = useMemo(() => buildLineCollection(stations, route), [route, stations]);
+  const lineDataRef = useRef(lineData);
   const stationData = useMemo(
     () =>
       buildStationCollection(stations, language, {
@@ -53,8 +55,11 @@ export function OfflineTehranMap({
       }),
     [destinationId, language, originId, route?.stations, selectedStationId, stations],
   );
-  const lineData = useMemo(() => buildLineCollection(stations, route), [route, stations]);
   const clickHandlerRef = useRef(onStationClick);
+
+  useEffect(() => {
+    lineDataRef.current = lineData;
+  }, [lineData]);
 
   useEffect(() => {
     clickHandlerRef.current = onStationClick;
@@ -86,14 +91,11 @@ export function OfflineTehranMap({
     map.on("load", () => {
       map.addSource("metro-lines", {
         type: "geojson",
-        data: lineData,
+        data: lineDataRef.current,
       } satisfies GeoJSONSourceSpecification);
       map.addSource("metro-stations", {
         type: "geojson",
         data: stationData,
-        cluster: true,
-        clusterRadius: 28,
-        clusterMaxZoom: 14,
       } satisfies GeoJSONSourceSpecification);
 
       map.addLayer({
@@ -139,37 +141,25 @@ export function OfflineTehranMap({
         },
       });
       map.addLayer({
-        id: "station-clusters",
-        type: "circle",
-        source: "metro-stations",
-        filter: ["has", "point_count"],
-        paint: {
-          "circle-color": "#18181b",
-          "circle-radius": ["step", ["get", "point_count"], 17, 8, 22, 18, 28],
-          "circle-stroke-color": "#ffffff",
-          "circle-stroke-width": 2,
-        },
-      });
-      map.addLayer({
         id: "station-points",
         type: "circle",
         source: "metro-stations",
-        filter: ["!", ["has", "point_count"]],
         paint: {
           "circle-color": ["get", "color"],
           "circle-radius": [
             "case",
             ["==", ["get", "selected"], true],
-            ["interpolate", ["linear"], ["zoom"], 10, 7, 15, 10],
-            ["interpolate", ["linear"], ["zoom"], 10, 4, 15, 7],
+            ["interpolate", ["linear"], ["zoom"], 9, 6, 14, 10, 18, 14],
+            ["interpolate", ["linear"], ["zoom"], 9, 4, 14, 7, 18, 10],
           ],
           "circle-stroke-color": "#ffffff",
           "circle-stroke-width": [
             "case",
             ["==", ["get", "selected"], true],
-            3.5,
-            ["interpolate", ["linear"], ["zoom"], 10, 1.4, 15, 2.4],
+            3,
+            2,
           ],
+          "circle-opacity": 0.96,
         },
       });
     });
@@ -183,34 +173,23 @@ export function OfflineTehranMap({
     map.on("click", "station-points", (event) => {
       const feature = event.features?.[0];
       if (!feature?.properties || !event.lngLat) return;
+
+      const stationId = String(feature.properties.id ?? "");
+      const label = String(feature.properties.label ?? "");
+      const lines = String(feature.properties.lines ?? "");
       popupRef.current?.remove();
       popupRef.current = new maplibregl.Popup({ closeButton: true, maxWidth: "280px" })
         .setLngLat(event.lngLat)
         .setHTML(
-          `<div class="metro-map-popup"><strong>${escapeHtml(
-            String(feature.properties.label ?? ""),
-          )}</strong><span>${escapeHtml(String(feature.properties.lines ?? ""))}</span></div>`,
+          `<div class="metro-map-popup"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(
+            lines,
+          )}</span></div>`,
         )
         .addTo(map);
-      const stationId = feature.properties.id;
-      if (typeof stationId === "string") {
+
+      if (stationId) {
         clickHandlerRef.current?.(stationId);
       }
-    });
-    map.on("click", "station-clusters", (event) => {
-      const feature = event.features?.[0];
-      const clusterId = feature?.properties?.cluster_id;
-      if (clusterId === undefined || !feature?.geometry || feature.geometry.type !== "Point") return;
-
-      const source = map.getSource("metro-stations") as GeoJSONSource | undefined;
-      const coordinates = feature.geometry.coordinates as [number, number];
-      void source?.getClusterExpansionZoom(clusterId).then((zoom) => {
-        map.easeTo({
-          center: coordinates,
-          zoom,
-          duration: 280,
-        });
-      });
     });
 
     mapRef.current = map;
@@ -220,16 +199,16 @@ export function OfflineTehranMap({
       map.remove();
       mapRef.current = null;
     };
-  }, [lineData, stationData, style]);
+  }, [stationData, style]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map?.isStyleLoaded()) return;
 
-    const stationSource = map.getSource("metro-stations") as GeoJSONSource | undefined;
-    stationSource?.setData(stationData);
     const lineSource = map.getSource("metro-lines") as GeoJSONSource | undefined;
     lineSource?.setData(lineData);
+    const stationSource = map.getSource("metro-stations") as GeoJSONSource | undefined;
+    stationSource?.setData(stationData);
   }, [lineData, stationData]);
 
   return (
