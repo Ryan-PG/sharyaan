@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import type { Language, RouteResult, Station } from "@/types/metro";
 import { cn } from "@/utils/cn";
 import { stationDisplayName } from "@/utils/text";
-import { useMapLayout } from "@/components/map/useMapLayout";
+import { useGeographicMapLayout } from "@/components/map/useGeographicMapLayout";
 
 type MetroMapProps = {
   stations: Station[];
@@ -34,7 +34,7 @@ const MetroMap = memo(function MetroMap({
   onStationClick,
 }: MetroMapProps) {
   const { t } = useTranslation();
-  const layout = useMapLayout(stations);
+  const layout = useGeographicMapLayout(stations);
   const [transform, setTransform] = useState<Transform>({ x: 0, y: 0, scale: 1 });
   const [dragging, setDragging] = useState<{ id: number; x: number; y: number } | null>(null);
   const [hoveredStationId, setHoveredStationId] = useState<string | null>(null);
@@ -74,7 +74,7 @@ const MetroMap = memo(function MetroMap({
   const zoom = (amount: number) => {
     setTransform((current) => ({
       ...current,
-      scale: clamp(current.scale + amount, 0.75, 2.8),
+      scale: clamp(current.scale + amount, 0.72, 3.4),
     }));
   };
 
@@ -136,8 +136,26 @@ const MetroMap = memo(function MetroMap({
           className="h-full w-full"
           viewBox={`0 0 ${layout.width} ${layout.height}`}
           role="img"
-          aria-label={t("mapTitle")}
+          aria-label={`${t("mapTitle")} ${layout.boundsLabel}`}
         >
+          <defs>
+            <pattern id="offline-map-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+              <path
+                d="M 48 0 L 0 0 0 48"
+                fill="none"
+                stroke="hsl(var(--border))"
+                strokeWidth="0.7"
+                opacity="0.42"
+              />
+            </pattern>
+            <filter id="station-shadow" x="-60%" y="-60%" width="220%" height="220%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.24" />
+            </filter>
+          </defs>
+
+          <rect width={layout.width} height={layout.height} fill="hsl(var(--background))" />
+          <rect width={layout.width} height={layout.height} fill="url(#offline-map-grid)" />
+
           <motion.g
             animate={{
               x: transform.x,
@@ -148,14 +166,62 @@ const MetroMap = memo(function MetroMap({
             style={{ transformOrigin: "center" }}
           >
             <path
-              d={layout.boundaryPath}
+              d={layout.cityAreaPath}
               fill="hsl(var(--muted))"
               stroke="hsl(var(--border))"
               strokeWidth="2"
-              opacity="0.72"
+              opacity="0.74"
             />
 
-            <g opacity={route ? 0.28 : 0.78}>
+            <g>
+              {layout.longitudeLines.map((line) => (
+                <g key={line.key}>
+                  <line
+                    x1={line.x1}
+                    y1={line.y1}
+                    x2={line.x2}
+                    y2={line.y2}
+                    stroke="hsl(var(--border))"
+                    strokeWidth="1"
+                    strokeDasharray="5 8"
+                    opacity="0.72"
+                  />
+                  <text
+                    x={line.textX}
+                    y={line.textY}
+                    textAnchor="middle"
+                    className="fill-muted-foreground text-[10px] font-medium"
+                  >
+                    {line.label}
+                  </text>
+                </g>
+              ))}
+
+              {layout.latitudeLines.map((line) => (
+                <g key={line.key}>
+                  <line
+                    x1={line.x1}
+                    y1={line.y1}
+                    x2={line.x2}
+                    y2={line.y2}
+                    stroke="hsl(var(--border))"
+                    strokeWidth="1"
+                    strokeDasharray="5 8"
+                    opacity="0.72"
+                  />
+                  <text
+                    x={line.textX}
+                    y={line.textY}
+                    textAnchor="start"
+                    className="fill-muted-foreground text-[10px] font-medium"
+                  >
+                    {line.label}
+                  </text>
+                </g>
+              ))}
+            </g>
+
+            <g opacity={route ? 0.24 : 0.78}>
               {layout.edges.map((edge) => (
                 <line
                   key={edge.key}
@@ -164,7 +230,7 @@ const MetroMap = memo(function MetroMap({
                   x2={edge.to.x}
                   y2={edge.to.y}
                   stroke={edge.color}
-                  strokeWidth="4"
+                  strokeWidth="3.2"
                   strokeLinecap="round"
                 />
               ))}
@@ -186,7 +252,7 @@ const MetroMap = memo(function MetroMap({
                       x2={edge.to.x}
                       y2={edge.to.y}
                       stroke={edge.color}
-                      strokeWidth="9"
+                      strokeWidth="8"
                       strokeLinecap="round"
                       opacity="0.92"
                     />
@@ -232,6 +298,7 @@ const MetroMap = memo(function MetroMap({
                         fill={selected ? station.colors[0] : "hsl(var(--card))"}
                         stroke={station.colors[0]}
                         strokeWidth={isInterchange ? 3 : 2.4}
+                        filter="url(#station-shadow)"
                         initial={false}
                         animate={{
                           scale: station.id === selectedStationId ? 1.22 : 1,
@@ -259,6 +326,15 @@ const MetroMap = memo(function MetroMap({
                 );
               })}
             </g>
+
+            <text
+              x={layout.width - 32}
+              y={36}
+              textAnchor="end"
+              className="fill-muted-foreground text-[11px] font-medium"
+            >
+              Tehran - {layout.center.latitude.toFixed(2)}N, {layout.center.longitude.toFixed(2)}E
+            </text>
           </motion.g>
         </svg>
       </div>

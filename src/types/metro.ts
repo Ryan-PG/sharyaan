@@ -45,6 +45,7 @@ export type RouteStep = {
   line: number | null;
   color: string;
   transferTo?: number;
+  transferDirection?: Station;
 };
 
 export type RouteResult = {

@@ -144,6 +144,67 @@ svg text {
   user-select: none;
 }
 
+.maplibregl-popup-content {
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  box-shadow: 0 18px 50px -28px rgb(15 23 42 / 0.45);
+  font-family: inherit;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: hsl(var(--card));
+  border-bottom-color: hsl(var(--card));
+}
+
+.maplibregl-popup-close-button {
+  color: hsl(var(--muted-foreground));
+  font-size: 18px;
+  line-height: 1;
+}
+
+.maplibregl-popup-close-button:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.metro-map-popup {
+  display: grid;
+  gap: 4px;
+  padding-inline-end: 12px;
+}
+
+.metro-map-popup strong {
+  color: hsl(var(--card-foreground));
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.metro-map-popup span {
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.maplibregl-ctrl-group {
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+}
+
+.maplibregl-ctrl-group button {
+  background-color: hsl(var(--card));
+}
+
+.maplibregl-ctrl-group button span {
+  filter: none;
+}
+
+.dark .maplibregl-ctrl button .maplibregl-ctrl-icon {
+  filter: invert(1);
+}
+
 ::selection {
   background: rgb(24 24 27 / 0.14);
 }

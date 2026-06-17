@@ -100,7 +100,7 @@ export function findShortestPath(
 
   if (stations.length < 2) return null;
 
-  const steps = buildSteps(stations, routeStates.map((state) => state.line));
+  const steps = buildSteps(stations, routeStates.map((state) => state.line), graph);
   const linesUsed = Array.from(new Set(steps.map((step) => step.line).filter(isNumber)));
   const transfers = steps.filter((step) => step.transferTo !== undefined).length;
 
@@ -116,24 +116,68 @@ export function findShortestPath(
   };
 }
 
-function buildSteps(stations: Station[], lines: Array<number | null>): RouteStep[] {
+function buildSteps(
+  stations: Station[],
+  lines: Array<number | null>,
+  graph: MetroGraph,
+): RouteStep[] {
   const firstLine = lines.find(isNumber) ?? stations[0]?.lines[0] ?? null;
 
   return stations.map((station, index) => {
     const previousLine = index > 0 ? lines[index - 1] : null;
     const currentLine = lines[index] ?? previousLine ?? firstLine;
     const transferTo =
-      index > 0 && currentLine !== null && previousLine !== null && currentLine !== previousLine
-        ? currentLine
+      index < stations.length - 1 &&
+      currentLine !== null &&
+      lines[index + 1] !== null &&
+      lines[index + 1] !== currentLine
+        ? lines[index + 1]!
         : undefined;
+    const nextRouteStation = stations[index + 1];
 
     return {
       station,
       line: currentLine,
       color: getLineColor(station, currentLine) || getLineColorFromStations(stations, currentLine ?? 0),
       transferTo,
+      transferDirection:
+        transferTo !== undefined && nextRouteStation
+          ? findLineTerminal(graph, station, nextRouteStation, transferTo)
+          : undefined,
     };
   });
+}
+
+function findLineTerminal(
+  graph: MetroGraph,
+  transferStation: Station,
+  nextRouteStation: Station,
+  line: number,
+) {
+  const visited = new Set<string>([transferStation.id]);
+  let previous = transferStation;
+  let current = nextRouteStation;
+
+  while (true) {
+    visited.add(current.id);
+    const next = (graph.adjacency.get(current.id) ?? [])
+      .map((edge) => graph.stations.get(edge.to))
+      .filter((station): station is Station => Boolean(station))
+      .filter((station) => station.id !== previous.id)
+      .filter((station) => !visited.has(station.id))
+      .filter((station) => station.lines.includes(line));
+
+    if (next.length === 0) return current;
+
+    next.sort((a, b) => {
+      const distanceA = distanceSquared(current, a);
+      const distanceB = distanceSquared(current, b);
+      return distanceA - distanceB;
+    });
+
+    previous = current;
+    current = next[0];
+  }
 }
 
 function reconstructPath(end: QueueNode, previous: Map<string, PreviousNode>) {
@@ -159,6 +203,10 @@ function stateKey(id: string, line: number | null) {
 
 function isNumber(value: number | null | undefined): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function distanceSquared(a: Station, b: Station) {
+  return (a.latitude - b.latitude) ** 2 + (a.longitude - b.longitude) ** 2;
 }
 
 class MinQueue<T> {

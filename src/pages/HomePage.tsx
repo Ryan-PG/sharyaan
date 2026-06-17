@@ -1,8 +1,8 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { AppHeader } from "@/components/AppHeader";
-import { MapSkeleton } from "@/components/map/MapSkeleton";
+import { OfflineTehranMap } from "@/components/map/OfflineTehranMap";
 import { RouteEmptyState } from "@/components/route/RouteEmptyState";
 import { RecentSearches } from "@/components/route/RecentSearches";
 import { RouteResultPanel } from "@/components/route/RouteResultPanel";
@@ -15,8 +15,6 @@ import { useMetroStore } from "@/store/useMetroStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMetroData } from "@/hooks/useMetroData";
 import { useRouteParams } from "@/hooks/useRouteParams";
-
-const MetroMap = lazy(() => import("@/components/map/MetroMap"));
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -182,23 +180,21 @@ export default function HomePage() {
           <p className="text-center text-xs text-muted-foreground">{t("keyboardHint")}</p>
         </div>
 
-        <Suspense fallback={<MapSkeleton />}>
-          <MetroMap
-            stations={stations}
-            language={language}
-            originId={originId}
-            destinationId={destinationId}
-            selectedStationId={selectedStationId}
-            route={route}
-            onStationClick={handleStationClick}
-          />
-        </Suspense>
-
         {route ? (
           <RouteResultPanel route={route} language={language} copiedUrl={copiedUrl} />
         ) : (
           <RouteEmptyState message={routeMessage} />
         )}
+
+        <OfflineTehranMap
+          stations={stations}
+          language={language}
+          originId={originId}
+          destinationId={destinationId}
+          selectedStationId={selectedStationId}
+          route={route}
+          onStationClick={handleStationClick}
+        />
       </main>
 
       <StationDetailsSheet

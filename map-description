@@ -1,0 +1,23 @@
+The /metro-map page now uses the MBTiles file from assets/maps as a real offline Tehran basemap.
+
+Current map data:
+- Source file: assets/maps/osm-2020-02-10-v3.11_iran_tehran.mbtiles
+- Format: OpenMapTiles vector MBTiles, PBF tiles, TMS scheme
+- Extracted runtime tiles: public/maps/tehran/{z}/{x}/{y}.pbf
+- Renderer: MapLibre GL
+
+Why extraction is needed:
+- Browsers cannot read SQLite MBTiles files directly.
+- The script scripts/extract-mbtiles.mjs converts the MBTiles tile rows into normal web tile paths.
+- The script also converts the MBTiles TMS row numbering into XYZ row numbering and decompresses gzip-wrapped PBF tiles.
+
+How to regenerate local tiles:
+- Put a compatible .mbtiles file in assets/maps.
+- Run: node scripts/extract-mbtiles.mjs
+- The generated public/maps/tehran folder is ignored by git because it is derived from the MBTiles file.
+
+Runtime behavior:
+- The app does not download map tiles from the internet.
+- The map page overlays metro lines and stations from src/data/stations.json.
+- Close station nodes are clustered and become selectable as you zoom in.
+- The JPG metro diagram remains below the street map as a reference.

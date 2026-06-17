@@ -33,7 +33,21 @@ export function RouteResultPanel({ route, language, copiedUrl }: RouteResultPane
       `${t("stops")}: ${formatNumber(route.stops, language)}`,
       `${t("transfers")}: ${formatNumber(route.transfers, language)}`,
       `${t("estimatedTime")}: ${formatNumber(route.estimatedMinutes, language)} ${t("minuteUnit")}`,
-      route.steps.map((step) => stationDisplayName(step.station, language)).join(" -> "),
+      route.steps
+        .map((step) => {
+          const stationName = stationDisplayName(step.station, language);
+          if (!step.transferTo) return stationName;
+
+          const direction = step.transferDirection
+            ? stationDisplayName(step.transferDirection, language)
+            : stationDisplayName(route.destination, language);
+
+          return `${stationName} (${t("changeToLineDirection", {
+            line: formatNumber(step.transferTo, language),
+            direction,
+          })})`;
+        })
+        .join(" -> "),
     ].join("\n");
     await copyText(text);
     setCopied("route");
@@ -170,11 +184,14 @@ function RouteTimeline({ route, language }: { route: RouteResult; language: Lang
     <ol className="space-y-0">
       {route.steps.map((step, index) => {
         const isLast = index === route.steps.length - 1;
+        const transferDirection = step.transferDirection
+          ? stationDisplayName(step.transferDirection, language)
+          : stationDisplayName(route.destination, language);
 
         return (
           <motion.li
             key={`${step.station.id}-${index}`}
-            className="grid grid-cols-[24px_1fr] gap-3"
+            className="grid grid-cols-[22px_minmax(0,1fr)] gap-3 sm:grid-cols-[24px_minmax(0,1fr)]"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.15, delay: Math.min(index * 0.015, 0.3) }}
@@ -185,11 +202,13 @@ function RouteTimeline({ route, language }: { route: RouteResult; language: Lang
                 style={{ backgroundColor: step.color, boxShadow: `0 0 0 2px ${step.color}` }}
               />
               {!isLast ? (
-                <span className="h-10 w-0.5 flex-1" style={{ backgroundColor: step.color }} />
+                <span className="min-h-10 w-0.5 flex-1" style={{ backgroundColor: step.color }} />
               ) : null}
             </div>
             <div className={isLast ? "pb-0" : "pb-5"}>
-              <p className="font-medium">{stationDisplayName(step.station, language)}</p>
+              <p className="text-sm font-medium leading-6 sm:text-base">
+                {stationDisplayName(step.station, language)}
+              </p>
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 {step.line ? (
                   <Badge>
@@ -202,8 +221,13 @@ function RouteTimeline({ route, language }: { route: RouteResult; language: Lang
                   </Badge>
                 ) : null}
                 {step.transferTo ? (
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {t("changeToLine", { line: formatNumber(step.transferTo, language) })}
+                  <span className="inline-flex max-w-full items-center rounded-md border border-foreground/10 bg-accent px-2.5 py-1 text-xs font-semibold leading-5 text-accent-foreground sm:text-sm">
+                    <span className="truncate">
+                      {t("changeToLineDirection", {
+                        line: formatNumber(step.transferTo, language),
+                        direction: transferDirection,
+                      })}
+                    </span>
                   </span>
                 ) : null}
               </div>
