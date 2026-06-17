@@ -12,6 +12,29 @@ export type RawStation = {
   latitude: string | number;
   colors: string[];
   disabled?: boolean;
+  address?: string;
+  wc?: boolean | null;
+  coffeeShop?: boolean | null;
+  groceryStore?: boolean | null;
+  fastFood?: boolean | null;
+  fastFoodn?: boolean | null;
+  atm?: boolean | null;
+  elevator?: boolean | null;
+  bicycleParking?: boolean | null;
+  waterCooler?: boolean | null;
+  cleanFood?: boolean | null;
+  blindPath?: boolean | null;
+  fireSuppressionSystem?: boolean | null;
+  fireExtinguisher?: boolean | null;
+  metroPolice?: boolean | null;
+  creditTicketSales?: boolean | null;
+  waitingChair?: boolean | null;
+  camera?: boolean | null;
+  trashCan?: boolean | null;
+  smoking?: boolean | null;
+  petsAllowed?: boolean | null;
+  freeWifi?: boolean | null;
+  prayerRoom?: boolean | null;
   relations: string[];
 };
 
@@ -27,6 +50,32 @@ export type Station = {
   colors: string[];
   relations: string[];
   disabled: boolean;
+  address: string;
+  amenities: StationAmenities;
+};
+
+export type StationAmenities = {
+  wc: boolean | null;
+  coffeeShop: boolean | null;
+  groceryStore: boolean | null;
+  fastFood: boolean | null;
+  atm: boolean | null;
+  elevator: boolean | null;
+  bicycleParking: boolean | null;
+  waterCooler: boolean | null;
+  cleanFood: boolean | null;
+  blindPath: boolean | null;
+  fireSuppressionSystem: boolean | null;
+  fireExtinguisher: boolean | null;
+  metroPolice: boolean | null;
+  creditTicketSales: boolean | null;
+  waitingChair: boolean | null;
+  camera: boolean | null;
+  trashCan: boolean | null;
+  smoking: boolean | null;
+  petsAllowed: boolean | null;
+  freeWifi: boolean | null;
+  prayerRoom: boolean | null;
 };
 
 export type GraphEdge = {

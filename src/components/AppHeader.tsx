@@ -1,4 +1,4 @@
-import { Map, Moon, Route, Sun, TrainFront } from "lucide-react";
+import { ListTree, Map, Moon, Route, Sun, TrainFront } from "lucide-react";
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -31,9 +31,12 @@ export function AppHeader({
         <span className="truncate text-sm font-semibold">{t("appName")}</span>
       </div>
 
-      <nav className="order-3 grid w-full grid-cols-2 gap-1 rounded-lg border bg-card p-1 sm:order-none sm:w-auto">
+      <nav className="order-3 grid w-full grid-cols-3 gap-1 rounded-lg border bg-card p-1 sm:order-none sm:w-auto">
         <HeaderLink to="/" label={t("routePlanner")}>
           <Route className="size-4" aria-hidden />
+        </HeaderLink>
+        <HeaderLink to="/stations" label={t("stations")}>
+          <ListTree className="size-4" aria-hidden />
         </HeaderLink>
         <HeaderLink to="/metro-map" label={t("officialMetroMap")}>
           <Map className="size-4" aria-hidden />
