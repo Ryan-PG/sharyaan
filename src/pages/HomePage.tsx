@@ -72,6 +72,7 @@ export default function HomePage() {
       if (!originId || (originId && destinationId)) {
         setOrigin(stationId);
         if (originId && destinationId) setDestination(null);
+        setRouteRequested(false);
         return;
       }
 

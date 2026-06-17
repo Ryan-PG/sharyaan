@@ -26,6 +26,18 @@ export function RouteResultPanel({ route, language, copiedUrl }: RouteResultPane
     );
   }, [language, route?.linesUsed, t]);
 
+  const pathList = useMemo(() => {
+    if (!route) return "";
+    return route.stations.map((station) => stationDisplayName(station, language)).join(" -> ");
+  }, [language, route]);
+
+  const transferStations = useMemo(() => {
+    if (!route) return [];
+    return route.steps
+      .filter((step) => step.transferTo !== undefined)
+      .map((step) => step.station);
+  }, [route]);
+
   const copyRoute = async () => {
     if (!route) return;
     const text = [
@@ -88,12 +100,41 @@ export function RouteResultPanel({ route, language, copiedUrl }: RouteResultPane
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                <Metric label={t("stops")} value={formatNumber(route.stops, language)} />
+                <Metric
+                  label={t("stations")}
+                  value={formatNumber(route.stations.length, language)}
+                />
                 <Metric label={t("transfers")} value={formatNumber(route.transfers, language)} />
                 <Metric
                   label={t("estimatedTime")}
                   value={`${formatNumber(route.estimatedMinutes, language)} ${t("minuteUnit")}`}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {t("estimatedTravelPath")}
+                </p>
+                <p className="rounded-lg border bg-background px-3 py-2 text-sm leading-6 text-muted-foreground">
+                  {pathList}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {t("transferStations")}
+                </p>
+                {transferStations.length ? (
+                  <div className="flex flex-wrap gap-2">
+                    {transferStations.map((station) => (
+                      <Badge key={station.id}>{stationDisplayName(station, language)}</Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rounded-lg border bg-background px-3 py-2 text-sm text-muted-foreground">
+                    {t("noTransfers")}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">

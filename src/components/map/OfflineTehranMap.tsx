@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { Language, RouteResult, Station } from "@/types/metro";
-import { stationDisplayName } from "@/utils/text";
+import { formatNumber, stationDisplayName } from "@/utils/text";
 
 type OfflineTehranMapProps = {
   stations: Station[];
@@ -43,23 +43,37 @@ export function OfflineTehranMap({
   const mapRef = useRef<maplibregl.Map | null>(null);
   const popupRef = useRef<maplibregl.Popup | null>(null);
   const style = useMemo(() => buildStyle(), []);
-  const lineData = useMemo(() => buildLineCollection(stations, route), [route, stations]);
+  const lineData = useMemo(() => buildLineCollection(stations), [stations]);
+  const routeData = useMemo(() => buildRouteCollection(route), [route]);
   const lineDataRef = useRef(lineData);
+  const routeDataRef = useRef(routeData);
   const stationData = useMemo(
     () =>
       buildStationCollection(stations, language, {
         originId,
         destinationId,
         selectedStationId,
-        routeStationIds: new Set(route?.stations.map((station) => station.id) ?? []),
       }),
-    [destinationId, language, originId, route?.stations, selectedStationId, stations],
+    [destinationId, language, originId, selectedStationId, stations],
+  );
+  const stationDataRef = useRef(stationData);
+  const selectedStation = useMemo(
+    () => stations.find((station) => station.id === selectedStationId) ?? null,
+    [selectedStationId, stations],
   );
   const clickHandlerRef = useRef(onStationClick);
 
   useEffect(() => {
     lineDataRef.current = lineData;
   }, [lineData]);
+
+  useEffect(() => {
+    routeDataRef.current = routeData;
+  }, [routeData]);
+
+  useEffect(() => {
+    stationDataRef.current = stationData;
+  }, [stationData]);
 
   useEffect(() => {
     clickHandlerRef.current = onStationClick;
@@ -93,9 +107,13 @@ export function OfflineTehranMap({
         type: "geojson",
         data: lineDataRef.current,
       } satisfies GeoJSONSourceSpecification);
+      map.addSource("metro-route", {
+        type: "geojson",
+        data: routeDataRef.current,
+      } satisfies GeoJSONSourceSpecification);
       map.addSource("metro-stations", {
         type: "geojson",
-        data: stationData,
+        data: stationDataRef.current,
       } satisfies GeoJSONSourceSpecification);
 
       map.addLayer({
@@ -111,11 +129,10 @@ export function OfflineTehranMap({
       map.addLayer({
         id: "metro-route-shadow",
         type: "line",
-        source: "metro-lines",
-        filter: ["==", ["get", "route"], true],
+        source: "metro-route",
         paint: {
           "line-color": "#ffffff",
-          "line-width": ["interpolate", ["linear"], ["zoom"], 10, 8, 15, 13],
+          "line-width": 12,
           "line-opacity": 0.95,
         },
       });
@@ -132,12 +149,26 @@ export function OfflineTehranMap({
       map.addLayer({
         id: "metro-route",
         type: "line",
-        source: "metro-lines",
-        filter: ["==", ["get", "route"], true],
+        source: "metro-route",
         paint: {
           "line-color": ["get", "color"],
-          "line-width": ["interpolate", ["linear"], ["zoom"], 10, 4.5, 15, 8],
+          "line-width": 7,
           "line-opacity": 0.98,
+        },
+      });
+      map.addLayer({
+        id: "station-point-halo",
+        type: "circle",
+        source: "metro-stations",
+        paint: {
+          "circle-color": "#020617",
+          "circle-radius": [
+            "case",
+            ["any", ["==", ["get", "isOrigin"], true], ["==", ["get", "isDestination"], true]],
+            12,
+            9,
+          ],
+          "circle-opacity": 0.32,
         },
       });
       map.addLayer({
@@ -148,18 +179,19 @@ export function OfflineTehranMap({
           "circle-color": ["get", "color"],
           "circle-radius": [
             "case",
-            ["==", ["get", "selected"], true],
-            ["interpolate", ["linear"], ["zoom"], 9, 6, 14, 10, 18, 14],
-            ["interpolate", ["linear"], ["zoom"], 9, 4, 14, 7, 18, 10],
+            ["any", ["==", ["get", "isOrigin"], true], ["==", ["get", "isDestination"], true]],
+            10,
+            7,
           ],
           "circle-stroke-color": "#ffffff",
           "circle-stroke-width": [
             "case",
-            ["==", ["get", "selected"], true],
+            ["any", ["==", ["get", "isOrigin"], true], ["==", ["get", "isDestination"], true]],
             3,
             2,
           ],
-          "circle-opacity": 0.96,
+          "circle-opacity": 1,
+          "circle-stroke-opacity": 1,
         },
       });
     });
@@ -172,21 +204,9 @@ export function OfflineTehranMap({
     });
     map.on("click", "station-points", (event) => {
       const feature = event.features?.[0];
-      if (!feature?.properties || !event.lngLat) return;
+      if (!feature?.properties) return;
 
       const stationId = String(feature.properties.id ?? "");
-      const label = String(feature.properties.label ?? "");
-      const lines = String(feature.properties.lines ?? "");
-      popupRef.current?.remove();
-      popupRef.current = new maplibregl.Popup({ closeButton: true, maxWidth: "280px" })
-        .setLngLat(event.lngLat)
-        .setHTML(
-          `<div class="metro-map-popup"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(
-            lines,
-          )}</span></div>`,
-        )
-        .addTo(map);
-
       if (stationId) {
         clickHandlerRef.current?.(stationId);
       }
@@ -199,17 +219,73 @@ export function OfflineTehranMap({
       map.remove();
       mapRef.current = null;
     };
-  }, [stationData, style]);
+  }, [style]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map?.isStyleLoaded()) return;
+    if (!map) return;
 
-    const lineSource = map.getSource("metro-lines") as GeoJSONSource | undefined;
-    lineSource?.setData(lineData);
-    const stationSource = map.getSource("metro-stations") as GeoJSONSource | undefined;
-    stationSource?.setData(stationData);
-  }, [lineData, stationData]);
+    const updateSources = () => {
+      const lineSource = map.getSource("metro-lines") as GeoJSONSource | undefined;
+      lineSource?.setData(lineDataRef.current);
+      const routeSource = map.getSource("metro-route") as GeoJSONSource | undefined;
+      routeSource?.setData(routeDataRef.current);
+      const stationSource = map.getSource("metro-stations") as GeoJSONSource | undefined;
+      stationSource?.setData(stationDataRef.current);
+    };
+
+    if (map.isStyleLoaded()) {
+      updateSources();
+      return;
+    }
+
+    map.once("load", updateSources);
+    return () => {
+      map.off("load", updateSources);
+    };
+  }, [lineData, routeData, stationData]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    popupRef.current?.remove();
+    popupRef.current = null;
+
+    if (!map || !selectedStation) return;
+
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      maxWidth: "280px",
+      offset: 12,
+    })
+      .setLngLat([selectedStation.longitude, selectedStation.latitude])
+      .setHTML(
+        `<div class="metro-map-popup"><strong>${escapeHtml(
+          stationDisplayName(selectedStation, language),
+        )}</strong><span>${escapeHtml(
+          `${t("lines")}: ${selectedStation.lines
+            .map((line) => formatNumber(line, language))
+            .join(", ")}`,
+        )}</span></div>`,
+      );
+
+    popupRef.current = popup;
+    const addPopup = () => {
+      if (popupRef.current === popup) popup.addTo(map);
+    };
+
+    if (map.isStyleLoaded()) {
+      addPopup();
+    } else {
+      map.once("load", addPopup);
+    }
+
+    return () => {
+      map.off("load", addPopup);
+      popup.remove();
+      if (popupRef.current === popup) popupRef.current = null;
+    };
+  }, [language, selectedStation, t]);
 
   return (
     <section className="overflow-hidden rounded-lg border bg-card shadow-panel">
@@ -348,7 +424,6 @@ function buildStationCollection(
     originId: string | null;
     destinationId: string | null;
     selectedStationId: string | null;
-    routeStationIds: Set<string>;
   },
 ): GeoJSON.FeatureCollection {
   return {
@@ -370,26 +445,18 @@ function buildStationCollection(
             : station.id === selection.destinationId
               ? "#dc2626"
               : station.colors[0] ?? "#71717a",
-        selected:
-          station.id === selection.originId ||
-          station.id === selection.destinationId ||
-          station.id === selection.selectedStationId ||
-          selection.routeStationIds.has(station.id),
+        isOrigin: station.id === selection.originId,
+        isDestination: station.id === selection.destinationId,
+        isSelected: station.id === selection.selectedStationId,
       },
     })),
   };
 }
 
-function buildLineCollection(stations: Station[], route: RouteResult | null): GeoJSON.FeatureCollection {
+function buildLineCollection(stations: Station[]): GeoJSON.FeatureCollection {
   const byId = new Map(stations.map((station) => [station.id, station]));
   const seen = new Set<string>();
-  const routeEdges = new Set<string>();
   const features: GeoJSON.Feature[] = [];
-
-  route?.stations.forEach((station, index) => {
-    const next = route.stations[index + 1];
-    if (next) routeEdges.add([station.id, next.id].sort().join("__"));
-  });
 
   for (const station of stations) {
     for (const relationId of station.relations) {
@@ -412,7 +479,6 @@ function buildLineCollection(stations: Station[], route: RouteResult | null): Ge
         },
         properties: {
           color: station.colors[colorIndex] ?? station.colors[0] ?? "#71717a",
-          route: routeEdges.has(key),
         },
       });
     }
@@ -421,6 +487,37 @@ function buildLineCollection(stations: Station[], route: RouteResult | null): Ge
   return {
     type: "FeatureCollection",
     features,
+  };
+}
+
+function buildRouteCollection(route: RouteResult | null): GeoJSON.FeatureCollection {
+  if (!route) {
+    return {
+      type: "FeatureCollection",
+      features: [],
+    };
+  }
+
+  return {
+    type: "FeatureCollection",
+    features: route.stations.slice(0, -1).map((station, index) => {
+      const next = route.stations[index + 1];
+      const step = route.steps[index];
+
+      return {
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [station.longitude, station.latitude],
+            [next.longitude, next.latitude],
+          ],
+        },
+        properties: {
+          color: step?.color ?? station.colors[0] ?? "#2563eb",
+        },
+      };
+    }),
   };
 }
 
