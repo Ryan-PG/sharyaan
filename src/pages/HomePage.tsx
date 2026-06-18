@@ -1,19 +1,27 @@
-import { useCallback, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { AppHeader } from "@/components/AppHeader";
-import { OfflineTehranMap } from "@/components/map/OfflineTehranMap";
+import { MapSkeleton } from "@/components/map/MapSkeleton";
 import { RouteEmptyState } from "@/components/route/RouteEmptyState";
 import { RecentSearches } from "@/components/route/RecentSearches";
 import { RouteResultPanel } from "@/components/route/RouteResultPanel";
 import { RouteSelectionCard } from "@/components/route/RouteSelectionCard";
 import { FavoritesList } from "@/components/stations/FavoritesList";
+import { usePageSeo } from "@/hooks/usePageSeo";
 import { findShortestPath } from "@/services/dijkstra";
+import { buildDefaultMetadata } from "@/services/seo";
 import { buildRouteUrl } from "@/services/share";
 import { useMetroStore } from "@/store/useMetroStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMetroData } from "@/hooks/useMetroData";
 import { useRouteParams } from "@/hooks/useRouteParams";
+
+const OfflineTehranMap = lazy(() =>
+  import("@/components/map/OfflineTehranMap").then((module) => ({
+    default: module.OfflineTehranMap,
+  })),
+);
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -37,6 +45,7 @@ export default function HomePage() {
   const addRecentRoute = useMetroStore((state) => state.addRecentRoute);
 
   useRouteParams(stations);
+  usePageSeo(buildDefaultMetadata("/"));
 
   const route = useMemo(() => {
     if (!routeRequested && !(originId && destinationId)) return null;
@@ -176,15 +185,17 @@ export default function HomePage() {
           <RouteEmptyState message={routeMessage} />
         )}
 
-        <OfflineTehranMap
-          stations={stations}
-          language={language}
-          originId={originId}
-          destinationId={destinationId}
-          selectedStationId={selectedStationId}
-          route={route}
-          onStationClick={handleStationClick}
-        />
+        <Suspense fallback={<MapSkeleton />}>
+          <OfflineTehranMap
+            stations={stations}
+            language={language}
+            originId={originId}
+            destinationId={destinationId}
+            selectedStationId={selectedStationId}
+            route={route}
+            onStationClick={handleStationClick}
+          />
+        </Suspense>
       </main>
     </motion.div>
   );

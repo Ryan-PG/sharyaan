@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { AppHeader } from "@/components/AppHeader";
 import { MetroImageMap } from "@/components/map/MetroImageMap";
+import { usePageSeo } from "@/hooks/usePageSeo";
+import { buildDefaultMetadata } from "@/services/seo";
 import { useMetroStore } from "@/store/useMetroStore";
 
 export default function MetroMapPage() {
@@ -8,6 +10,8 @@ export default function MetroMapPage() {
   const theme = useMetroStore((state) => state.theme);
   const setLanguage = useMetroStore((state) => state.setLanguage);
   const setTheme = useMetroStore((state) => state.setTheme);
+
+  usePageSeo(buildDefaultMetadata("/metro-map"));
 
   return (
     <motion.div
