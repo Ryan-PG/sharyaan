@@ -7,9 +7,12 @@ const rootDir = path.resolve(__dirname, "..");
 const distDir = path.join(rootDir, "dist");
 const stationsFile = path.join(rootDir, "src", "data", "stations.json");
 const baseUrl = normalizeBaseUrl(
-  process.env.VITE_SITE_URL || "https://tehran-metro-navigator.local",
+  process.env.VITE_SITE_URL || "https://sharyaan-metro-navigator.local",
 );
-const siteNameFa = "مسیریاب مترو تهران";
+const siteNameFa = "مسیریاب متروی تهران شریان";
+const siteNameEn = "Sharyaan Metro Navigator";
+const defaultDescription =
+  "شریان به شما کمک میکند سریعترین مسیر را در شبکه متروی تهران پیدا کنید. Sharyaan helps you find the fastest routes across the Tehran Metro network with an offline-first, modern navigation experience.";
 
 const rawStations = JSON.parse(await fs.readFile(stationsFile, "utf8"));
 const stations = normalizeStations(rawStations);
@@ -144,9 +147,8 @@ function getStationNeighbors(station) {
 
 function buildDefaultMetadata(routePath) {
   return {
-    title: `${siteNameFa} | Tehran Metro Navigator`,
-    description:
-      "مسیریاب مترو تهران با نقشه آفلاین، فهرست ایستگاهها، خطوط مترو و راهنمای مسیر",
+    title: `${siteNameFa} | ${siteNameEn}`,
+    description: defaultDescription,
     canonicalUrl: `${baseUrl}${routePath}`,
   };
 }
@@ -156,7 +158,7 @@ function buildStationMetadata(station) {
 
   return {
     title,
-    description: `اطلاعات کامل ایستگاه مترو ${station.nameFa || station.name} خطوط ایستگاههای مجاور و مسیرهای دسترسی`,
+    description: `اطلاعات کامل ایستگاه مترو ${station.nameFa || station.name} در شریان، شامل خطوط، ایستگاههای مجاور و مسیرهای دسترسی.`,
     canonicalUrl: `${baseUrl}${stationPath(station)}`,
   };
 }
@@ -164,7 +166,7 @@ function buildStationMetadata(station) {
 function buildLineMetadata(line) {
   return {
     title: `${line.name} مترو تهران | ${siteNameFa}`,
-    description: `فهرست ایستگاههای ${line.name} مترو تهران به ترتیب مسیر همراه با لینک اطلاعات هر ایستگاه`,
+    description: `فهرست ایستگاههای ${line.name} مترو تهران در شریان، به ترتیب مسیر همراه با لینک اطلاعات هر ایستگاه.`,
     canonicalUrl: `${baseUrl}${linePath(line.id)}`,
   };
 }
@@ -256,8 +258,8 @@ async function writeRouteHtml(routePath, html) {
 
 function renderHomeFallback() {
   return `<main dir="rtl" lang="fa" class="mx-auto w-full max-w-7xl space-y-4 px-4 py-8">
-      <h1>مسیریاب مترو تهران</h1>
-      <p>مسیریاب مترو تهران با نقشه آفلاین، فهرست ایستگاهها و صفحات اختصاصی خطوط مترو.</p>
+      <h1>شریان</h1>
+      <p>مسیریابی سریع و هوشمند برای شبکه متروی تهران با تجربه آفلاین و مدرن.</p>
       <nav>
         <a href="/stations">فهرست ایستگاهها</a>
         <a href="/metro-map">نقشه مترو</a>

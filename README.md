@@ -1,6 +1,8 @@
-# Ry-Teh Metro Navigator
+# Sharyaan
 
-A modern offline React application for finding routes across the Tehran Metro network. The app uses `src/data/stations.json` as the single source of truth for stations, coordinates, line colors, and relations.
+A modern offline-first route planner for the Tehran Metro network.
+
+Sharyaan helps riders find fast routes across Tehran Metro with a modern navigation experience. The app uses `src/data/stations.json` as the single source of truth for stations, coordinates, line colors, and relations.
 
 ## Website Link
 

@@ -4,8 +4,8 @@ import { initReactI18next } from "react-i18next";
 export const resources = {
   en: {
     translation: {
-      appName: "Tehran Metro Navigator",
-      subtitle: "Find the fastest route across Tehran Metro",
+      appName: "Sharyaan",
+      subtitle: "Fast, intelligent, offline-first navigation for Tehran Metro.",
       routePlanner: "Route planner",
       stations: "Stations",
       stationsDirectory: "Stations by line",
@@ -104,8 +104,8 @@ export const resources = {
   },
   fa: {
     translation: {
-      appName: "مسیریاب متروی تهران",
-      subtitle: "سریع‌ترین مسیر را در متروی تهران پیدا کنید",
+      appName: "شریان",
+      subtitle: "مسیریابی سریع و هوشمند برای شبکه متروی تهران",
       routePlanner: "مسیریاب",
       stations: "ایستگاه‌ها",
       stationsDirectory: "ایستگاه‌ها بر اساس خط",

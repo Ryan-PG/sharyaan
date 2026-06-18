@@ -1,8 +1,13 @@
 import type { Station } from "@/types/metro";
 import { compareStationPersianNames } from "@/utils/text";
 
-export const SITE_NAME_FA = "مسیریاب مترو تهران";
-export const DEFAULT_BASE_URL = "https://tehran-metro-navigator.local";
+export const SITE_NAME_FA = "مسیریاب متروی تهران شریان";
+export const SITE_NAME_EN = "Sharyaan Metro Navigator";
+export const DEFAULT_BASE_URL = "https://sharyaan-metro-navigator.local";
+export const DEFAULT_DESCRIPTION =
+  "Sharyaan helps you find the fastest routes across the Tehran Metro network with an offline-first, modern navigation experience.";
+export const DEFAULT_DESCRIPTION_FA =
+  "شریان به شما کمک میکند سریعترین مسیر را در شبکه متروی تهران پیدا کنید.";
 
 export type MetroLine = {
   id: number;
@@ -112,7 +117,7 @@ export function getStationNeighbors(station: Station, stations: Station[]): Stat
 
 export function buildStationMetadata(station: Station, baseUrl = getSiteUrl()): SeoMetadata {
   const title = `ایستگاه مترو ${station.nameFa || station.name} | ${SITE_NAME_FA}`;
-  const description = `اطلاعات کامل ایستگاه مترو ${station.nameFa || station.name} خطوط ایستگاههای مجاور و مسیرهای دسترسی`;
+  const description = `اطلاعات کامل ایستگاه مترو ${station.nameFa || station.name} در شریان، شامل خطوط، ایستگاههای مجاور و مسیرهای دسترسی.`;
 
   return {
     title,
@@ -124,16 +129,15 @@ export function buildStationMetadata(station: Station, baseUrl = getSiteUrl()): 
 export function buildLineMetadata(line: MetroLine, baseUrl = getSiteUrl()): SeoMetadata {
   return {
     title: `${line.name} مترو تهران | ${SITE_NAME_FA}`,
-    description: `فهرست ایستگاههای ${line.name} مترو تهران به ترتیب مسیر همراه با لینک اطلاعات هر ایستگاه`,
+    description: `فهرست ایستگاههای ${line.name} مترو تهران در شریان، به ترتیب مسیر همراه با لینک اطلاعات هر ایستگاه.`,
     canonicalUrl: `${baseUrl}${linePath(line.id)}`,
   };
 }
 
 export function buildDefaultMetadata(path = "/", baseUrl = getSiteUrl()): SeoMetadata {
   return {
-    title: `${SITE_NAME_FA} | Tehran Metro Navigator`,
-    description:
-      "مسیریاب مترو تهران با نقشه آفلاین، فهرست ایستگاهها، خطوط مترو و راهنمای مسیر",
+    title: `${SITE_NAME_FA} | ${SITE_NAME_EN}`,
+    description: `${DEFAULT_DESCRIPTION_FA} ${DEFAULT_DESCRIPTION}`,
     canonicalUrl: `${baseUrl}${path}`,
   };
 }

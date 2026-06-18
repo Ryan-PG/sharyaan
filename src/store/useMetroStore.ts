@@ -25,6 +25,11 @@ type PersistedMetroState = Pick<
   "language" | "theme" | "recentRoutes" | "favoriteStationIds"
 >;
 
+const storageKey = "sharyaan-metro-navigator";
+const legacyStorageKey = "tehran-metro-navigator";
+
+migrateLegacyStorageKey();
+
 export const useMetroStore = create<MetroState>()(
   persist(
     (set, get) => ({
@@ -62,7 +67,7 @@ export const useMetroStore = create<MetroState>()(
       },
     }),
     {
-      name: "tehran-metro-navigator",
+      name: storageKey,
       version: 1,
       migrate: (persistedState): PersistedMetroState => ({
         ...(persistedState as PersistedMetroState),
@@ -78,3 +83,16 @@ export const useMetroStore = create<MetroState>()(
     },
   ),
 );
+
+function migrateLegacyStorageKey() {
+  if (typeof window === "undefined") return;
+
+  try {
+    if (!window.localStorage.getItem(storageKey)) {
+      const legacyValue = window.localStorage.getItem(legacyStorageKey);
+      if (legacyValue) window.localStorage.setItem(storageKey, legacyValue);
+    }
+  } catch {
+    // Ignore storage errors and let Zustand initialize with defaults.
+  }
+}

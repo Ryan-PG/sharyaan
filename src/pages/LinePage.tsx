@@ -11,6 +11,7 @@ import {
   buildLineJsonLd,
   buildLineMetadata,
   getLineById,
+  SITE_NAME_FA,
   stationPath,
 } from "@/services/seo";
 import { useMetroStore } from "@/store/useMetroStore";
@@ -33,7 +34,7 @@ export default function LinePage() {
 
   usePageSeo(
     metadata ?? {
-      title: "خط مترو تهران | مسیریاب مترو تهران",
+      title: `خط مترو تهران | ${SITE_NAME_FA}`,
       description: "اطلاعات خطوط مترو تهران",
       canonicalUrl: `${window.location.origin}/lines/${lineId}`,
     },

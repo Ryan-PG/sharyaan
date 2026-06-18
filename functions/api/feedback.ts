@@ -1,4 +1,19 @@
-export async function onRequestPost(context: any) {
+type D1DatabaseBinding = {
+  prepare: (query: string) => {
+    bind: (...values: unknown[]) => {
+      run: () => Promise<unknown>;
+    };
+  };
+};
+
+type FeedbackRequestContext = {
+  request: Request;
+  env: {
+    DB: D1DatabaseBinding;
+  };
+};
+
+export async function onRequestPost(context: FeedbackRequestContext) {
   const { request, env } = context;
 
   try {

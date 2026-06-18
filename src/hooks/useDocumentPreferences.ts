@@ -4,8 +4,8 @@ import { useMetroStore } from "@/store/useMetroStore";
 import type { Language } from "@/types/metro";
 
 const documentTitles: Record<Language, string> = {
-  en: "Tehran Metro Navigator",
-  fa: "مسیریاب متروی تهران",
+  en: "Sharyaan Metro Navigator",
+  fa: "مسیریاب متروی تهران شریان",
 };
 
 export function useDocumentPreferences() {

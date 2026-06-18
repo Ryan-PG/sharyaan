@@ -1,5 +1,6 @@
 {
-  "name": "tehran-metro-navigator",
+  "name": "sharyaan-metro-navigator",
+  "description": "Fast, intelligent, offline-first navigation for Tehran Metro.",
   "private": true,
   "version": "1.0.0",
   "type": "module",

@@ -29,7 +29,7 @@ const feedbackCopy = {
     feedbackLabel: "Feedback",
     feedbackOpen: "Open feedback form",
     feedbackTitle: "Send feedback",
-    feedbackDescription: "Share bugs, route data corrections, or product ideas with the developer.",
+    feedbackDescription: "Share bugs, route data corrections, or product ideas with the Sharyaan team.",
     feedbackType: "Type",
     feedbackTypeBug: "Bug report",
     feedbackTypeFeature: "Feature request",

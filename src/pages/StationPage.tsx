@@ -15,6 +15,7 @@ import {
   findStationBySlug,
   getStationNeighbors,
   linePath,
+  SITE_NAME_FA,
   stationPath,
 } from "@/services/seo";
 import { useMetroStore } from "@/store/useMetroStore";
@@ -43,7 +44,7 @@ export default function StationPage() {
 
   usePageSeo(
     metadata ?? {
-      title: "ایستگاه مترو | مسیریاب مترو تهران",
+      title: `ایستگاه مترو | ${SITE_NAME_FA}`,
       description: "اطلاعات ایستگاههای مترو تهران",
       canonicalUrl: `${window.location.origin}/stations/${slug}`,
     },
