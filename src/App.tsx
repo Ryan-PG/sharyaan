@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
 import { useDocumentPreferences } from "@/hooks/useDocumentPreferences";
 import HomePage from "@/pages/HomePage";
 import LinePage from "@/pages/LinePage";
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/lines/:lineId" element={<LinePage />} />
         </Routes>
       </AnimatePresence>
+      <FeedbackWidget />
     </BrowserRouter>
   );
 }
