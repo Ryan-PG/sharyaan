@@ -17,21 +17,21 @@ export async function onRequestPost(context: any) {
       return new Response("Message too short", { status: 400 });
     }
 
-    // await env.DB.prepare(
-    //   `INSERT INTO feedback
-    //   (type, message, email, station, route_from, route_to, created_at)
-    //   VALUES (?, ?, ?, ?, ?, ?, ?)`
-    // )
-    //   .bind(
-    //     type,
-    //     message,
-    //     email || null,
-    //     station || null,
-    //     route_from || null,
-    //     route_to || null,
-    //     new Date().toISOString()
-    //   )
-    //   .run();
+    await env.DB.prepare(
+      `INSERT INTO feedback
+      (type, message, email, station, route_from, route_to, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        type,
+        message,
+        email || null,
+        station || null,
+        route_from || null,
+        route_to || null,
+        new Date().toISOString()
+      )
+      .run();
 
     return Response.json({ ok: true });
 
