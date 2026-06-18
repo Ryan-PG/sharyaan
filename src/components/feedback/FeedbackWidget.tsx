@@ -1,4 +1,4 @@
-import { MessageCircle, Send, Loader2, CheckCircle2 } from "lucide-react";
+import { ExternalLink, MessageCircle, Send, Loader2, CheckCircle2 } from "lucide-react";
 import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 import { Dialog } from "@/components/ui/Dialog";
@@ -152,6 +152,17 @@ export function FeedbackWidget() {
         <MessageCircle className="size-4" aria-hidden />
         {copy.feedbackLabel}
       </button>
+
+      <a
+        href="https://links.ryanheida.com"
+        target="_blank"
+        rel="noreferrer"
+        dir="ltr"
+        className="fixed bottom-4 left-4 z-30 inline-flex min-h-11 items-center gap-2 rounded-full border bg-card px-4 text-sm font-semibold text-card-foreground shadow-soft transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 sm:bottom-6 sm:left-6"
+      >
+        <ExternalLink className="size-4" aria-hidden />
+        links.ryanheida.com
+      </a>
 
       <Dialog
         open={open}
