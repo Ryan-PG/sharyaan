@@ -7,7 +7,7 @@ export function MetroImageMap() {
   const { t } = useTranslation();
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader className="border-b pb-4">
         <div className="flex items-center gap-2">
           <Map className="size-4 text-muted-foreground" aria-hidden />
@@ -16,11 +16,11 @@ export function MetroImageMap() {
         <p className="text-sm text-muted-foreground">{t("officialMetroMapHint")}</p>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="overflow-x-auto overscroll-contain">
+        <div className="bg-muted/30">
           <img
             src={metroMapImage}
             alt={t("officialMetroMap")}
-            className="block h-auto min-w-[720px] max-w-none sm:min-w-full sm:max-w-full"
+            className="block h-auto w-full max-w-full"
             loading="lazy"
             decoding="async"
           />
