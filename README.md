@@ -231,6 +231,22 @@ CREATE TABLE feedback (
 "
 ```
 
+and for remote
+```bash
+wrangler d1 execute metro_feedback_db --remote --command "
+CREATE TABLE IF NOT EXISTS feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT,
+  message TEXT,
+  email TEXT,
+  station TEXT,
+  route_from TEXT,
+  route_to TEXT,
+  created_at TEXT
+);
+"
+```
+
 ---
 
 ### 4. Deploy
