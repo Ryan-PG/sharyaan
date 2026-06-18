@@ -1,0 +1,8 @@
+name = "feedback-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "metro_feedback_db"
+database_id = "0b477cc8-dbc4-4efc-9dbd-763cc9bd323a"
