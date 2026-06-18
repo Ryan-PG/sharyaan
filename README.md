@@ -2,18 +2,40 @@
 
 A modern offline React application for finding routes across the Tehran Metro network. The app uses `src/data/stations.json` as the single source of truth for stations, coordinates, line colors, and relations.
 
+## Website Link
+
+> [tehmetro.ryanheida.com](tehmetro.ryanheida.com)
+
+## Demo
+
+<table width="700">
+  <tr>
+    <td colspan="2">
+      <img src="assets/images/demo/routing.png" alt="Route planning demo" width="700">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="assets/images/demo/stations.png" alt="Station details demo" width="340">
+    </td>
+    <td width="50%">
+      <img src="assets/images/demo/tehran-metro-map.png" alt="Tehran metro map demo" width="340">
+    </td>
+  </tr>
+</table>
+
 ## Features
 
-* Bilingual English/Persian UI with RTL support and Persian numerals
-* Light and dark themes with local persistence
-* Searchable station comboboxes with keyboard navigation
-* Bidirectional graph builder and Dijkstra shortest path routing
-* Transfer-aware route summary and animated station timeline
-* Custom SVG metro map generated from station latitude/longitude
-* Pan, zoom, station click selection, and route highlighting
-* Station details sheet with line badges and favorites
-* Recent searches, favorite stations, shareable route URLs, and copy route action
-* No map tiles, API keys, backend, or third-party map service
+- Bilingual English/Persian UI with RTL support and Persian numerals
+- Light and dark themes with local persistence
+- Searchable station comboboxes with keyboard navigation
+- Bidirectional graph builder and Dijkstra shortest path routing
+- Transfer-aware route summary and animated station timeline
+- Custom SVG metro map generated from station latitude/longitude
+- Pan, zoom, station click selection, and route highlighting
+- Station details sheet with line badges and favorites
+- Recent searches, favorite stations, shareable route URLs, and copy route action
+- No map tiles, API keys, backend, or third-party map service
 
 ## Setup
 
@@ -61,10 +83,10 @@ VITE_SITE_URL=https://example.com npm run build
 
 `npm run build` runs TypeScript, Vite, and `scripts/generate-seo.mjs`. The generator reads `src/data/stations.json` and outputs:
 
-* `dist/stations/<station-slug>/index.html`
-* `dist/lines/<line-id>/index.html`
-* `dist/sitemap.xml`
-* `dist/robots.txt`
+- `dist/stations/<station-slug>/index.html`
+- `dist/lines/<line-id>/index.html`
+- `dist/sitemap.xml`
+- `dist/robots.txt`
 
 Do not edit `dist/` directly.
 
@@ -209,8 +231,8 @@ Pages → Project → Settings → Functions → D1 Bindings
 
 Add:
 
-* Variable name: `DB`
-* Database: `metro_feedback_db`
+- Variable name: `DB`
+- Database: `metro_feedback_db`
 
 ---
 
@@ -232,6 +254,7 @@ CREATE TABLE feedback (
 ```
 
 and for remote
+
 ```bash
 wrangler d1 execute metro_feedback_db --remote --command "
 CREATE TABLE IF NOT EXISTS feedback (
@@ -258,9 +281,9 @@ npm run deploy
 
 Pages automatically deploys:
 
-* React app
-* Functions
-* D1 binding
+- React app
+- Functions
+- D1 binding
 
 ---
 
@@ -270,9 +293,9 @@ Pages automatically deploys:
 fetch("/api/feedback", {
   method: "POST",
   headers: {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
   },
-  body: JSON.stringify(payload)
+  body: JSON.stringify(payload),
 });
 ```
 
@@ -280,27 +303,27 @@ fetch("/api/feedback", {
 
 ## Security & Production Notes
 
-* Add optional rate limiting (KV recommended)
-* Consider API key header for spam protection
-* Validate message length server-side (already enforced)
-* Avoid exposing raw D1 errors to client
+- Add optional rate limiting (KV recommended)
+- Consider API key header for spam protection
+- Validate message length server-side (already enforced)
+- Avoid exposing raw D1 errors to client
 
 ---
 
 ## Deployment Notes
 
-* Pages Functions handle backend logic
-* D1 is managed by Cloudflare (no external DB needed)
-* No separate Worker deployment required
-* `/api/*` routes are automatically mapped via Functions directory
+- Pages Functions handle backend logic
+- D1 is managed by Cloudflare (no external DB needed)
+- No separate Worker deployment required
+- `/api/*` routes are automatically mapped via Functions directory
 
 ---
 
 ## Optional Future Improvements
 
-* `/admin/feedback` dashboard inside React app
-* feedback filtering (bug / feature / station)
-* CSV export from D1
-* rate limiting with KV
-* analytics on most reported stations
-* automatic tagging / classification of feedback messages
+- `/admin/feedback` dashboard inside React app
+- feedback filtering (bug / feature / station)
+- CSV export from D1
+- rate limiting with KV
+- analytics on most reported stations
+- automatic tagging / classification of feedback messages
