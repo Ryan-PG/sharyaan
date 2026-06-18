@@ -67,3 +67,8 @@ tmp/
 temp/
 *.tmp
 *.temp
+
+
+# Cloudflare
+.wrangler/
+wrangler.toml
