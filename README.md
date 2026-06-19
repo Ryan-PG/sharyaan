@@ -6,7 +6,7 @@ Sharyaan helps riders find fast routes across Tehran Metro with a modern navigat
 
 ## Website Link
 
-> [tehmetro.ryanheida.com](tehmetro.ryanheida.com)
+> [sharyaan.ryanheida.com](sharyaan.ryanheida.com)
 
 ## Demo
 
