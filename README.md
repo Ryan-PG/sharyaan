@@ -318,6 +318,7 @@ fetch("/api/feedback", {
 - D1 is managed by Cloudflare (no external DB needed)
 - No separate Worker deployment required
 - `/api/*` routes are automatically mapped via Functions directory
+- You must bind a D1 DB for your project in clouadflare manually or by the `wrangler.toml` file.
 
 ---
 
