@@ -1,7 +1,11 @@
 import { Map } from "lucide-react";
+import type { StaticImageData } from "next/image";
 import { useTranslation } from "react-i18next";
 import metroMapImage from "../../../assets/images/tehran-metro-map.jpg";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+
+const metroMapImageSrc =
+  typeof metroMapImage === "string" ? metroMapImage : (metroMapImage as StaticImageData).src;
 
 export function MetroImageMap() {
   const { t } = useTranslation();
@@ -18,7 +22,7 @@ export function MetroImageMap() {
       <CardContent className="p-0">
         <div className="bg-muted/30">
           <img
-            src={metroMapImage}
+            src={metroMapImageSrc}
             alt={t("officialMetroMap")}
             className="block h-auto w-full max-w-full"
             loading="lazy"

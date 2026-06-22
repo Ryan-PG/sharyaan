@@ -94,8 +94,8 @@ export function FeedbackWidget() {
   const canSubmit = form.message.trim().length >= 10 && !submitting;
   const routeContext = useMemo(
     () => ({
-      fromStation: originId,
-      toStation: destinationId,
+      route_from: originId,
+      route_to: destinationId,
       selectedRouteId: selectedStationId,
     }),
     [destinationId, originId, selectedStationId],

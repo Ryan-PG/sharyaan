@@ -4,6 +4,8 @@ node_modules/
 # Production builds
 dist/
 build/
+.next/
+out/
 
 # TypeScript incremental build info
 *.tsbuildinfo

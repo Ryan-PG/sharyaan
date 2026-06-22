@@ -1,6 +1,8 @@
+"use client";
+
+import Link from "next/link";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Link, Navigate, useParams } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { StationDetails } from "@/components/stations/StationDetails";
 import { StationMapPreview } from "@/components/stations/StationMapPreview";
@@ -8,50 +10,32 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useMetroData } from "@/hooks/useMetroData";
-import { usePageSeo } from "@/hooks/usePageSeo";
 import {
-  buildStationJsonLd,
-  buildStationMetadata,
   findStationBySlug,
   getStationNeighbors,
   linePath,
-  SITE_NAME_FA,
   stationPath,
 } from "@/services/seo";
 import { useMetroStore } from "@/store/useMetroStore";
 import { formatNumber, stationDisplayName } from "@/utils/text";
 
-export default function StationPage() {
-  const { slug = "" } = useParams();
+type StationPageProps = {
+  slug: string;
+};
+
+export default function StationPage({ slug }: StationPageProps) {
   const { stations } = useMetroData();
   const station = useMemo(() => findStationBySlug(stations, slug), [slug, stations]);
   const language = useMetroStore((state) => state.language);
   const theme = useMetroStore((state) => state.theme);
   const setLanguage = useMetroStore((state) => state.setLanguage);
   const setTheme = useMetroStore((state) => state.setTheme);
-  const metadata = useMemo(
-    () => (station ? buildStationMetadata(station) : null),
-    [station],
-  );
-  const jsonLd = useMemo(
-    () => (station ? buildStationJsonLd(station, stations) : null),
-    [station, stations],
-  );
   const neighbors = useMemo(
     () => (station ? getStationNeighbors(station, stations) : null),
     [station, stations],
   );
 
-  usePageSeo(
-    metadata ?? {
-      title: `ایستگاه مترو | ${SITE_NAME_FA}`,
-      description: "اطلاعات ایستگاههای مترو تهران",
-      canonicalUrl: `${window.location.origin}/stations/${slug}`,
-    },
-    jsonLd,
-  );
-
-  if (!station) return <Navigate to="/stations" replace />;
+  if (!station) return null;
 
   return (
     <motion.div
@@ -86,41 +70,39 @@ export default function StationPage() {
         <aside className="space-y-4">
           <Card>
             <CardHeader className="border-b pb-4">
-              <CardTitle>لینکهای مرتبط</CardTitle>
+              <CardTitle>Related links</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-5">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">خطوط ایستگاه</p>
+                <p className="text-sm font-medium text-muted-foreground">Station lines</p>
                 <div className="flex flex-wrap gap-2">
                   {station.lines.map((line) => (
-                    <Link key={line} to={linePath(line)}>
-                      <Badge className="min-h-8">
-                        خط {formatNumber(line, language)}
-                      </Badge>
+                    <Link key={line} href={linePath(line)}>
+                      <Badge className="min-h-8">Line {formatNumber(line, language)}</Badge>
                     </Link>
                   ))}
                 </div>
               </div>
 
               <RelatedStationList
-                title="ایستگاه قبلی"
+                title="Previous stations"
                 stations={neighbors?.previous ?? []}
                 language={language}
               />
               <RelatedStationList
-                title="ایستگاه بعدی"
+                title="Next stations"
                 stations={neighbors?.next ?? []}
                 language={language}
               />
               <RelatedStationList
-                title="ایستگاههای نزدیک"
+                title="Nearby stations"
                 stations={neighbors?.nearby ?? []}
                 language={language}
               />
 
-              <Link to="/">
+              <Link href="/">
                 <Button variant="secondary" className="w-full">
-                  مسیریابی از این ایستگاه
+                  Plan a route from this station
                 </Button>
               </Link>
             </CardContent>
@@ -149,7 +131,7 @@ function RelatedStationList({
         {stations.map((station) => (
           <Link
             key={`${title}-${station.id}`}
-            to={stationPath(station)}
+            href={stationPath(station)}
             className="rounded-md border bg-muted/25 px-3 py-2 text-sm font-medium transition hover:bg-muted"
           >
             {stationDisplayName(station, language)}

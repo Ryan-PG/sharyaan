@@ -11,7 +11,7 @@ export function buildGraph(stations: Station[]): MetroGraph {
   for (const station of stations) {
     for (const relationId of station.relations) {
       const relation = stationMap.get(relationId);
-      if (!relation || relation.disabled) continue;
+      if (!relation) continue;
 
       addEdge(adjacency, station, relation);
       addEdge(adjacency, relation, station);

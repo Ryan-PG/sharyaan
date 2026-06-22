@@ -1,4 +1,7 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+"use client";
+
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { AppHeader } from "@/components/AppHeader";
@@ -8,26 +11,31 @@ import { RecentSearches } from "@/components/route/RecentSearches";
 import { RouteResultPanel } from "@/components/route/RouteResultPanel";
 import { RouteSelectionCard } from "@/components/route/RouteSelectionCard";
 import { FavoritesList } from "@/components/stations/FavoritesList";
-import { usePageSeo } from "@/hooks/usePageSeo";
 import { findShortestPath } from "@/services/dijkstra";
-import { buildDefaultMetadata } from "@/services/seo";
 import { buildRouteUrl } from "@/services/share";
 import { useMetroStore } from "@/store/useMetroStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMetroData } from "@/hooks/useMetroData";
-import { useRouteParams } from "@/hooks/useRouteParams";
 
-const OfflineTehranMap = lazy(() =>
-  import("@/components/map/OfflineTehranMap").then((module) => ({
-    default: module.OfflineTehranMap,
-  })),
+const OfflineTehranMap = dynamic(
+  () => import("@/components/map/OfflineTehranMap").then((module) => module.OfflineTehranMap),
+  {
+    loading: () => <MapSkeleton />,
+    ssr: false,
+  },
 );
 
-export default function HomePage() {
+type HomePageProps = {
+  initialFrom?: string;
+  initialTo?: string;
+};
+
+export default function HomePage({ initialFrom, initialTo }: HomePageProps) {
   const { t } = useTranslation();
   const { stations, graph } = useMetroData();
   const [focusToken, setFocusToken] = useState(0);
   const [routeRequested, setRouteRequested] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState("");
 
   const originId = useMetroStore((state) => state.originId);
   const destinationId = useMetroStore((state) => state.destinationId);
@@ -44,17 +52,20 @@ export default function HomePage() {
   const setTheme = useMetroStore((state) => state.setTheme);
   const addRecentRoute = useMetroStore((state) => state.addRecentRoute);
 
-  useRouteParams(stations);
-  usePageSeo(buildDefaultMetadata("/"));
+  useEffect(() => {
+    const stationIds = new Set(stations.map((station) => station.id));
+
+    if (initialFrom && stationIds.has(initialFrom)) setOrigin(initialFrom);
+    if (initialTo && stationIds.has(initialTo)) setDestination(initialTo);
+  }, [initialFrom, initialTo, setDestination, setOrigin, stations]);
 
   const route = useMemo(() => {
     if (!routeRequested && !(originId && destinationId)) return null;
     return findShortestPath(graph, originId, destinationId);
   }, [destinationId, graph, originId, routeRequested]);
 
-  const copiedUrl = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return buildRouteUrl(originId, destinationId);
+  useEffect(() => {
+    setCopiedUrl(buildRouteUrl(originId, destinationId));
   }, [destinationId, originId]);
 
   const findRoute = useCallback(() => {
@@ -185,17 +196,15 @@ export default function HomePage() {
           <RouteEmptyState message={routeMessage} />
         )}
 
-        <Suspense fallback={<MapSkeleton />}>
-          <OfflineTehranMap
-            stations={stations}
-            language={language}
-            originId={originId}
-            destinationId={destinationId}
-            selectedStationId={selectedStationId}
-            route={route}
-            onStationClick={handleStationClick}
-          />
-        </Suspense>
+        <OfflineTehranMap
+          stations={stations}
+          language={language}
+          originId={originId}
+          destinationId={destinationId}
+          selectedStationId={selectedStationId}
+          route={route}
+          onStationClick={handleStationClick}
+        />
       </main>
     </motion.div>
   );

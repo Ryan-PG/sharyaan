@@ -1,5 +1,3 @@
-import "maplibre-gl/dist/maplibre-gl.css";
-
 import maplibregl, {
   type GeoJSONSource,
   type GeoJSONSourceSpecification,

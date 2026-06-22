@@ -1,6 +1,9 @@
+"use client";
+
 import { ListTree, Map, Moon, Route, Sun, TrainFront } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
@@ -79,20 +82,21 @@ function HeaderLink({
   label: string;
   children: ReactNode;
 }) {
+  const pathname = usePathname();
+  const isActive = to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`);
+
   return (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        cn(
-          "inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 text-xs font-medium transition sm:text-sm",
-          isActive
-            ? "bg-primary text-primary-foreground"
-            : "text-muted-foreground hover:bg-muted hover:text-foreground",
-        )
-      }
+    <Link
+      href={to}
+      className={cn(
+        "inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 text-xs font-medium transition sm:text-sm",
+        isActive
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+      )}
     >
       {children}
       <span className="truncate">{label}</span>
-    </NavLink>
+    </Link>
   );
 }

@@ -1,24 +1,22 @@
+"use client";
+
+import Link from "next/link";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Link, Navigate, useParams } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { LineMapPreview } from "@/components/stations/LineMapPreview";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useMetroData } from "@/hooks/useMetroData";
-import { usePageSeo } from "@/hooks/usePageSeo";
-import {
-  buildLineJsonLd,
-  buildLineMetadata,
-  getLineById,
-  SITE_NAME_FA,
-  stationPath,
-} from "@/services/seo";
+import { getLineById, stationPath } from "@/services/seo";
 import { useMetroStore } from "@/store/useMetroStore";
 import { formatNumber, stationDisplayName } from "@/utils/text";
 
-export default function LinePage() {
-  const { lineId = "" } = useParams();
+type LinePageProps = {
+  lineId: string;
+};
+
+export default function LinePage({ lineId }: LinePageProps) {
   const { stations } = useMetroData();
   const numericLineId = Number(lineId);
   const line = useMemo(
@@ -29,19 +27,8 @@ export default function LinePage() {
   const theme = useMetroStore((state) => state.theme);
   const setLanguage = useMetroStore((state) => state.setLanguage);
   const setTheme = useMetroStore((state) => state.setTheme);
-  const metadata = useMemo(() => (line ? buildLineMetadata(line) : null), [line]);
-  const jsonLd = useMemo(() => (line ? buildLineJsonLd(line) : null), [line]);
 
-  usePageSeo(
-    metadata ?? {
-      title: `خط مترو تهران | ${SITE_NAME_FA}`,
-      description: "اطلاعات خطوط مترو تهران",
-      canonicalUrl: `${window.location.origin}/lines/${lineId}`,
-    },
-    jsonLd,
-  );
-
-  if (!line) return <Navigate to="/stations" replace />;
+  if (!line) return null;
 
   return (
     <motion.div
@@ -69,10 +56,10 @@ export default function LinePage() {
                       style={{ backgroundColor: line.color }}
                       aria-hidden
                     />
-                    {line.name} مترو تهران
+                    {line.name} Tehran Metro
                   </CardTitle>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    {formatNumber(line.stations.length, language)} ایستگاه
+                    {formatNumber(line.stations.length, language)} stations
                   </p>
                 </div>
                 <Badge className="min-h-8">{line.color}</Badge>
@@ -83,7 +70,7 @@ export default function LinePage() {
                 {line.stations.map((station, index) => (
                   <li key={`${line.id}-${station.id}`}>
                     <Link
-                      to={stationPath(station)}
+                      href={stationPath(station)}
                       className="flex min-h-12 items-center gap-3 rounded-md border bg-muted/20 px-3 py-2 text-sm transition hover:bg-muted"
                     >
                       <span

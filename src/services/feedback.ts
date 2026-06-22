@@ -6,8 +6,8 @@ export type FeedbackPayload = {
   email?: string;
   station?: string;
   timestamp: string;
-  fromStation?: string | null;
-  toStation?: string | null;
+  route_from?: string | null;
+  route_to?: string | null;
   selectedRouteId?: string | null;
 };
 

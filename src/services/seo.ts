@@ -29,7 +29,7 @@ export type SeoMetadata = {
 };
 
 export function getSiteUrl() {
-  const envUrl = import.meta.env.VITE_SITE_URL as string | undefined;
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || process.env.VITE_SITE_URL;
   return normalizeBaseUrl(envUrl || DEFAULT_BASE_URL);
 }
 
@@ -185,64 +185,6 @@ export function buildLineJsonLd(line: MetroLine, baseUrl = getSiteUrl()) {
       url: `${baseUrl}${stationPath(station)}`,
     })),
   };
-}
-
-export function updateDocumentSeo(metadata: SeoMetadata, jsonLd?: unknown) {
-  if (typeof document === "undefined") return;
-
-  document.title = metadata.title;
-  setMeta("name", "title", metadata.title);
-  setMeta("name", "description", metadata.description);
-  setMeta("property", "og:title", metadata.title);
-  setMeta("property", "og:description", metadata.description);
-  setMeta("property", "og:url", metadata.canonicalUrl);
-  setMeta("property", "og:type", "website");
-  setMeta("name", "twitter:card", "summary");
-  setMeta("name", "twitter:title", metadata.title);
-  setMeta("name", "twitter:description", metadata.description);
-  setCanonical(metadata.canonicalUrl);
-  setJsonLd(jsonLd);
-}
-
-function setMeta(attribute: "name" | "property", key: string, content: string) {
-  let element = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`);
-
-  if (!element) {
-    element = document.createElement("meta");
-    element.setAttribute(attribute, key);
-    document.head.append(element);
-  }
-
-  element.content = content;
-}
-
-function setCanonical(href: string) {
-  let element = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-
-  if (!element) {
-    element = document.createElement("link");
-    element.rel = "canonical";
-    document.head.append(element);
-  }
-
-  element.href = href;
-}
-
-function setJsonLd(value?: unknown) {
-  const id = "page-json-ld";
-  const existing = document.getElementById(id);
-
-  if (!value) {
-    existing?.remove();
-    return;
-  }
-
-  const element = existing ?? document.createElement("script");
-  element.id = id;
-  element.setAttribute("type", "application/ld+json");
-  element.textContent = JSON.stringify(value);
-
-  if (!existing) document.head.append(element);
 }
 
 function slugify(value: string) {

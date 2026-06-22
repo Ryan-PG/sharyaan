@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/Badge";
 import { LineBadges } from "@/components/stations/LineBadges";
 import {
@@ -92,7 +92,7 @@ export function StationDetails({
             );
 
             return linkRelatedStations ? (
-              <Link key={`${station.id}-${line}-${color}`} to={linePath(line)}>
+              <Link key={`${station.id}-${line}-${color}`} href={linePath(line)}>
                 <Badge className="min-h-8">{content}</Badge>
               </Link>
             ) : (
@@ -126,7 +126,7 @@ export function StationDetails({
           <div className="flex flex-wrap gap-2">
             {neighbors.nearby.map((connectedStation) =>
               linkRelatedStations ? (
-                <Link key={connectedStation.id} to={stationPath(connectedStation)}>
+                <Link key={connectedStation.id} href={stationPath(connectedStation)}>
                   <Badge className="min-h-8">
                     {stationDisplayName(connectedStation, language)}
                   </Badge>

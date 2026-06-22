@@ -18,8 +18,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "plugins": [{ "name": "next" }],
+    "incremental": true
   },
-  "include": ["src"],
+  "include": ["next-env.d.ts", "app/**/*.ts", "app/**/*.tsx", "src"],
   "references": []
 }
