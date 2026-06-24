@@ -23,14 +23,21 @@ for (const station of Object.values(stations)) {
   }
 }
 
-const path = shortestPath("Tajrish", "Meydan-e Ketab");
+const smokeRoutes = [
+  ["Tajrish", "Meydan-e Ketab"],
+  ["Ahang", "Cheshmeh Ali"],
+];
 
-if (!path.length) {
-  throw new Error("Expected a route between Tajrish and Meydan-e Ketab");
+for (const [origin, destination] of smokeRoutes) {
+  const path = shortestPath(origin, destination);
+
+  if (!path.length) {
+    throw new Error(`Expected a route between ${origin} and ${destination}`);
+  }
+
+  console.log(`Route smoke test passed: ${origin} -> ${destination}: ${path.length - 1} stops`);
+  console.log(path.join(" -> "));
 }
-
-console.log(`Route smoke test passed: ${path.length - 1} stops`);
-console.log(path.join(" -> "));
 
 function shortestPath(origin, destination) {
   const queue = [origin];
